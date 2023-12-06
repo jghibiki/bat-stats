@@ -26,7 +26,7 @@ ENV PYTHONUNBUFFERED 1
 ###############################################################################
 FROM python-poetry-base AS python-poetry-builder
 RUN apt-get update \
-    && apt-get install --no-install-recommends --assume-yes curl
+    && apt-get install --no-install-recommends --assume-yes curl netcat-traditional
 # Install Poetry via the official installer: https://python-poetry.org/docs/master/#installing-with-the-official-installer
 # This script respects $POETRY_VERSION & $POETRY_HOME
 RUN curl -sSL https://install.python-poetry.org | python3 -
@@ -37,16 +37,19 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 FROM python-poetry-base AS python-poetry
 COPY --from=python-poetry-builder $POETRY_HOME $POETRY_HOME
 
-COPY bat_stats/ /app/bat_stats
+RUN apt-get update \
+    && apt-get install --no-install-recommends --assume-yes netcat-traditional
+
+COPY src/ /app/src/
 COPY pyproject.toml /app
-COPY README.md /app
-COPY manage.py /app
 COPY scripts/entrypoint.sh /app
 WORKDIR /app
 RUN poetry cache clear --all .
 RUN poetry config installer.max-workers 1
 RUN poetry run pip install wheel setuptools pip --upgrade
 RUN poetry install
+WORKDIR /app/src
+
 EXPOSE 8080
 
 ENTRYPOINT ["/app/entrypoint.sh"]

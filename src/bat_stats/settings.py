@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'list_editor.apps.ListEditorConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,6 +70,21 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bat_stats.wsgi.application'
+
+# Configuration for Q Cluster: https://django-q.readthedocs.io/en/latest/configure.html
+Q_CLUSTER = {
+    'name': 'bat_stats_queue',
+    'workers': 1,
+    'recycle': 500,
+    'timeout': 30,
+    'retry': 120,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 2,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    'orm': 'default',
+}
 
 
 # Database

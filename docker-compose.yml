@@ -8,7 +8,7 @@ services:
     build: .
     command: poetry run python manage.py runserver 0.0.0.0:8080
     volumes:
-      - ./bat_stats:/app/bat_stats
+      - ./src:/app/src
     ports:
       - 8080:8080
     environment:
@@ -22,6 +22,8 @@ services:
       SQL_HOST: db
       SQL_PORT: 5432
       DATABASE: postgres
+    depends_on:
+      - db
   db:
     image: postgres:15
     volumes:

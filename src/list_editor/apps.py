@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+import logging as log
 
 
 class ListEditorConfig(AppConfig):
