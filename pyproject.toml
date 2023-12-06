@@ -11,6 +11,9 @@ django = "^5.0"
 psycopg2-binary = "^2.9.9"
 django-q2 = "^1.6.1"
 requests = "^2.31.0"
+djangorestframework = "^3.14.0"
+django-filter = "^23.5"
+markdown = "^3.5.1"
 
 
 
