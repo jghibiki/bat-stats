@@ -1,0 +1,44 @@
+{% load django_htmx %}
+{% load static %}
+{% load compress %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% spaceless %}{% block title%}Home{% endblock %}{% endspaceless %}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        {% compress css %}
+            <link rel="stylesheet" href="{% static 'css/output.css' %}">
+            <script src="{% static 'js/htmx.min.js' %}" defer></script>{# or however you include htmx #}
+            {% django_htmx_script %}
+        {% endcompress %}
+    </head>
+    <body class="bg-blue-100">
+        <header>
+
+        </header>
+        <nav>
+
+        </nav>
+        {% block content %}{% endblock %}
+        <footer>
+
+        </footer>
+        <script>
+            {% if debug %}
+                if (typeof window.htmx !== "undefined") {
+                    htmx.on("htmx:afterSettle", function(detail) {
+                        if (
+                            typeof window.djdt !== "undefined"
+                            && detail.target instanceof HTMLBodyElement
+                        ) {
+                            djdt.show_toolbar();
+                        }
+                    });
+                }
+            {% endif %}
+        </script>
+    </body>
+</html>

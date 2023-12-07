@@ -21,3 +21,12 @@ docker-compose exec db psql --username=django --dbname=bat_stats
 ```shell
 docker-compose exec web poetry run python manage.py createsuperuser --username=joe --email=joe@example.com
 ```
+
+
+Notes:
+- django hdmx
+  - https://django-htmx.readthedocs.io/en/latest/index.html
+- htmx documentation
+  - https://htmx.org/docs/#boosting
+- guide for using tailwind, django, htmx
+  - https://testdriven.io/blog/django-htmx-tailwind/

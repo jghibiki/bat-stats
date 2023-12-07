@@ -1,9 +1,6 @@
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Bat Stats: Card List Editor</title>
-</head>
-<body>
+{% extends 'list_editor/base.html' %}
+
+{% block content %}
     {% if selected_cards %}
         <ul>
             {% for card in selected_cards %}
@@ -23,5 +20,4 @@
     {% else %}
         <p>No card options available.</p>
     {% endif %}
-</body>
-</html>
+{% endblock %}
