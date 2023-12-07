@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.models import User
+from datetime import datetime
 
 
 class AppModelVersion(models.Model):
@@ -19,7 +20,8 @@ class AppModelVersion(models.Model):
         return last_version
 
     def __str__(self):
-        return str(self.version)
+        parsed_version = datetime.fromtimestamp(self.version)
+        return f"{parsed_version} ({self.version})"
 
 
 class Affiliation(models.Model):
@@ -48,7 +50,7 @@ class Affiliation(models.Model):
 
 
 class Card(models.Model):
-    app_version = models.ForeignKey(AppModelVersion, on_delete=models.CASCADE)
+    app_version = models.ForeignKey(AppModelVersion, on_delete=models.CASCADE, related_name="cards")
     app_id = models.IntegerField()
     name = models.CharField(max_length=255)
     image = models.CharField(max_length=1000)

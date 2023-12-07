@@ -15,13 +15,17 @@
 
         <script src="{% static 'js/htmx.min.js' %}" defer></script>{# or however you include htmx #}
         {% django_htmx_script %}
+
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans&display=swap" rel="stylesheet">
     </head>
     <body class="bg-blue-400">
-        <header>
-            Bat Stats List Editor
+        <header class="flex flex-row items-center justify-between bg-yellow-400 mb-4 noprint p-6 border-black border-b-2">
+             <h1 class="text-4xl mb-1">
+                Bat Stats List Editor
+             </h1>
         </header>
         <nav>
-            a
+            TODO: Add Nav
         </nav>
         {% block content %}{% endblock %}
         <footer>
