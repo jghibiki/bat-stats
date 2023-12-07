@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
 from .models import Card, Affiliation, AppModelVersion
 
 def index(request):
@@ -20,3 +21,16 @@ def deck_editor(request):
         "list_editor/deck_editor.html",
         context
     )
+
+
+@require_http_methods(["POST"])
+def card_search(request):
+    query = request.POST['search']
+    search_results = []
+    if len(query) != 0:
+        search_results = Card.objects.filter(name__contains=query)
+
+    context = {
+        "search_results": search_results
+    }
+    return render(request, 'deck_editor.html', context)
