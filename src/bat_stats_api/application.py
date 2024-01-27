@@ -1,9 +1,11 @@
 import asyncio
 from aiohttp import web
 from tortoise.contrib.aiohttp import register_tortoise
+import aiohttp_cors
 
 from bat_stats_api.routes import route_table
 from bat_stats_api.updater import PeriodicUpdater
+from bat_stats_api.data.entity.entity_serializer import EntitySerializer
 
 
 def get_app():
@@ -23,17 +25,33 @@ class Application:
         self.app = web.Application()
         self.app.add_routes(route_table)
 
+        cors = aiohttp_cors.setup(self.app, defaults={
+            "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers="*",
+                allow_headers="*",
+            )
+        })
+
+        # Configure CORS on all routes.
+        for route in list(self.app.router.routes()):
+            cors.add(route)
+
         register_tortoise(
             self.app,
             db_url="asyncpg://user:pass@localhost:5432/bat_stats",
-            modules={"models": [
-                "bat_stats_api.models.affiliation",
-                "bat_stats_api.models.game_data_version",
-                "bat_stats_api.models.card",
-                "bat_stats_api.models.character",
+            modules={"entity": [
+                "bat_stats_api.data.entity.affiliation_entity",
+                "bat_stats_api.data.entity.game_data_version_entity",
+                "bat_stats_api.data.entity.card_entity",
+                "bat_stats_api.data.entity.character_entity",
+                "bat_stats_api.data.entity.weapon_entity",
+                "bat_stats_api.data.entity.trait_entity",
             ]},
             generate_schemas=True
         )
+
+        EntitySerializer()  # initialize serializers
 
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 

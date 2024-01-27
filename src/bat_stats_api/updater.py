@@ -6,10 +6,12 @@ from tortoise.exceptions import OperationalError
 from tortoise.transactions import in_transaction
 from tqdm import tqdm
 
-from .models.game_data_version import GameDataVersion
-from .models.affiliation import Affiliation
-from .models.card import Card
-from .models.character import Character
+from bat_stats_api.data.entity.game_data_version_entity import GameDataVersionEntity
+from bat_stats_api.data.entity.affiliation_entity import AffiliationEntity
+from bat_stats_api.data.entity.card_entity import CardEntity
+from bat_stats_api.data.entity.character_entity import CharacterEntity
+from bat_stats_api.data.entity.trait_entity import TraitEntity
+from bat_stats_api.data.entity.weapon_entity import WeaponEntity
 
 
 class PeriodicUpdater:
@@ -43,7 +45,7 @@ class PeriodicUpdater:
 
             current_version = data["version"]
             print(f"API Reported version: {current_version}")
-            previous_version: GameDataVersion = await GameDataVersion.all().order_by("-capture_date_time").first()
+            previous_version: GameDataVersionEntity = await GameDataVersionEntity.all().order_by("-capture_date_time").first()
 
             if previous_version and current_version == previous_version.id:
                 print(f"No update required. Current version matches previous version: {current_version}.")
@@ -62,7 +64,7 @@ class PeriodicUpdater:
             try:
                 async with in_transaction():
 
-                    version = GameDataVersion(
+                    version = GameDataVersionEntity(
                         id=current_version,
                         capture_date_time = datetime.datetime.now()
                     )
@@ -74,7 +76,7 @@ class PeriodicUpdater:
                         del affiliation_data["id"]
                         affiliation_data["app_id"] = affiliation["id"]
 
-                        a = Affiliation(
+                        a = AffiliationEntity(
                             game_data_version_id=version.id,
                             **affiliation_data
                         )
@@ -86,7 +88,7 @@ class PeriodicUpdater:
                         del card_data["id"]
                         card_data["app_id"] = card["id"]
 
-                        c = Card(
+                        c = CardEntity(
                             game_data_version_id=version.id,
                             **card_data
                         )
@@ -98,13 +100,40 @@ class PeriodicUpdater:
                         del character_data["id"]
                         character_data["app_id"] = character["id"]
 
-                        c = Character(
+                        c = CharacterEntity(
                             game_data_version_id=version.id,
                             **character_data
                         )
                         await c.save()
 
+                    print("Updating Weapon")
+                    for weapon in tqdm(data["weapons"]):
+                        weapon_data = {**weapon}
+                        del weapon_data["id"]
+                        weapon_data["app_id"] = weapon["id"]
+
+                        w = WeaponEntity(
+                            game_data_version_id=version.id,
+                            **weapon_data
+                        )
+                        await w.save()
+
+                    print("Updating Trait")
+                    for trait in tqdm(data["traits"]):
+                        trait_data = {**trait}
+                        del trait_data["id"]
+                        trait_data["app_id"] = trait["id"]
+
+                        t = TraitEntity(
+                            game_data_version_id=version.id,
+                            **trait_data
+                        )
+                        await t.save()
+
             except OperationalError as e:
+                print(e)
+                raise e
+            except Exception as e:
                 print(e)
                 raise e
 

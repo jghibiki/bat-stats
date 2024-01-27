@@ -6,35 +6,43 @@ version: '3.8'
 services:
   web:
     build: .
-    command: poetry run python manage.py runserver 0.0.0.0:8080
+    command: poetry run python -m bat_stats_api
     volumes:
       - ./src:/app/src
     ports:
       - 8080:8080
+      - 8090:8090
     environment:
       DEBUG: 1
       SECRET_KEY: foo
       DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 [::1]"
       SQL_ENGINE: django.db.backends.postgresql
       SQL_DATABASE: bat_stats
-      SQL_USER: django
-      SQL_PASSWORD: django
+      SQL_USER: user
+      SQL_PASSWORD: pass
       SQL_HOST: db
       SQL_PORT: 5432
       DATABASE: postgres
     depends_on:
-      - db
-  db:
+      - postgres
+      - redis
+  postgres:
     image: postgres:15
+    ports:
+      - 5432:5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_2:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: django
-      POSTGRES_PASSWORD: django
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
       POSTGRES_DB: bat_stats
+  redis:
+    image: redis:7.2.4-alpine
+    ports:
+      - 6379:6379
 
 volumes:
-  postgres_data:
+  postgres_data_2:
 
 
 

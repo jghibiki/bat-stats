@@ -1,13 +1,11 @@
 from tortoise.models import Model
 from tortoise import fields
 from tortoise.contrib.postgres.fields import ArrayField
-from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 
 
-
-class Affiliation(Model):
+class AffiliationEntity(Model):
     id = fields.IntField(pk=True)
-    game_data_version = fields.ForeignKeyField("models.GameDataVersion")
+    game_data_version = fields.ForeignKeyField("entity.GameDataVersionEntity", related_name="affiliation")
     app_id = fields.IntField()
     app_order = fields.IntField()
     deck_size = fields.IntField()
@@ -27,18 +25,3 @@ class Affiliation(Model):
         element_type="int"
     )
 
-
-Affiliation_Pydantic = pydantic_model_creator(Affiliation)
-Affiliation_Pydantic_List = pydantic_queryset_creator(Affiliation)
-
-
-async def Affiliation_Json(c):
-    return (
-        await Affiliation_Pydantic.from_tortoise_orm(c)
-   ).model_dump_json()
-
-
-async def Affiliation_Json_List(c):
-    return (
-        await Affiliation_Pydantic_List.from_queryset(c)
-    ).model_dump_json()

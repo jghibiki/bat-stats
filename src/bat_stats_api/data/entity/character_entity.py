@@ -3,12 +3,11 @@ from tortoise.models import Model
 from tortoise import fields
 from tortoise.contrib.postgres.fields import ArrayField
 
-from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 
-
-class Character(Model):
+class CharacterEntity(Model):
     id = fields.IntField(pk=True)
-    game_data_version = fields.ForeignKeyField("models.GameDataVersion")
+    app_id = fields.IntField()
+    game_data_version = fields.ForeignKeyField("entity.GameDataVersionEntity", related_name="character")
     name = fields.CharField(max_length=255)
     alias = fields.CharField(max_length=255)
     affiliations = fields.JSONField()
@@ -51,18 +50,3 @@ class Character(Model):
         element_type="int"
     )
 
-
-Character_Pydantic = pydantic_model_creator(Character)
-Character_Pydantic_List = pydantic_queryset_creator(Character)
-
-
-async def CharacterJson(c):
-    return (
-        await Character_Pydantic.from_tortoise_orm(c)
-    ).model_dump_json()
-
-
-async def CharacterJsonList(c):
-    return (
-        await Character_Pydantic_List.from_queryset(c)
-    ).model_dump_json()

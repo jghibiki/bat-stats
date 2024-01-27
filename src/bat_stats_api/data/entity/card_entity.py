@@ -2,14 +2,11 @@
 from tortoise.models import Model
 from tortoise import fields
 from tortoise.contrib.postgres.fields import ArrayField
-from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
-
-from bat_stats_api.models.enum_definitions import ObjectiveTypeId
 
 
-class Card(Model):
+class CardEntity(Model):
     id = fields.IntField(pk=True)
-    game_data_version = fields.ForeignKeyField("models.GameDataVersion")
+    game_data_version = fields.ForeignKeyField("entity.GameDataVersionEntity", related_name="card")
     app_id = fields.IntField()
     name = fields.CharField(max_length=255)
     image = fields.CharField(max_length=1000)
@@ -23,19 +20,3 @@ class Card(Model):
     required_character_ids = ArrayField(
         element_type="int"
     )
-
-
-Card_Pydantic = pydantic_model_creator(Card)
-Card_Pydantic_List = pydantic_queryset_creator(Card)
-
-
-async def CardJson(c):
-    return (
-        await Card_Pydantic.from_tortoise_orm(c)
-    ).model_dump_json()
-
-
-async def CardJsonList(c):
-    return (
-        await Card_Pydantic_List.from_queryset(c)
-    ).model_dump_json()
