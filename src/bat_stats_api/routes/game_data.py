@@ -27,6 +27,19 @@ async def get_latest_version(request: web.Request) -> Response:
         headers=MultiDict({"CONTENT-TYPE": "application/json"})
     )
 
+@route_table.get("/version/{id}")
+async def get_latest_version(request: web.Request) -> Response:
+    version_id = request.match_info["id"]
+    return web.Response(
+        text=await EntitySerializer
+            .get_instance()
+            .game_data_version_to_json(
+            await GameDataVersionEntity
+                .filter(id=version_id)
+                .first()
+        ),
+        headers=MultiDict({"CONTENT-TYPE": "application/json"})
+    )
 
 @route_table.get("/affiliation")
 async def get_affiliation(request: web.Request) -> web.Response:
