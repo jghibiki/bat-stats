@@ -8,6 +8,7 @@ __all__ = [
     "game_data",
     "debug",
     "optimized_game_data",
+    "diff_tool",
 ]
 from bat_stats_api.routes import *
 

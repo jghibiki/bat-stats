@@ -11,13 +11,7 @@ class CacheManager:
     __instance__ = None
 
     def __init__(self):
-        self.cache = Cache(
-            Cache.REDIS,
-            endpoint="127.0.0.1",
-            port=6379,
-            namespace="main",
-            serializer=PickleSerializer()
-        )
+        self.cache = Cache()
 
     @staticmethod
     def load():

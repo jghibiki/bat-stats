@@ -48,10 +48,10 @@ class PeriodicUpdater:
             previous_version: GameDataVersionEntity = await GameDataVersionEntity.all().order_by("-capture_date_time").first()
 
             if previous_version and current_version == previous_version.id:
-                print(f"No update required. Current version matches previous version: {current_version}.")
+                print(f"No update required. Current version matches previous version: {current_version.id}.")
                 return
             else:
-                print(f"Previous version: {previous_version}. Updating data.")
+                print(f"Previous version: {previous_version.id}. Updating data.")
 
             async with session.get('https://app.knightmodels.com/gamedata') as response:
                 if response.status != 200:

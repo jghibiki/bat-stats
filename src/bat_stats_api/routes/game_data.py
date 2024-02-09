@@ -1,6 +1,8 @@
 from aiohttp import web
 from aiohttp.web_response import Response
 from multidict import MultiDict
+
+from bat_stats_api.data.entity.trait_entity import TraitEntity
 from bat_stats_api.routes import route_table
 
 
@@ -97,6 +99,27 @@ async def get_character(request: web.Request) -> web.Response:
         headers=MultiDict({"CONTENT-TYPE": "application/json"})
     )
 
+@route_table.get("/character/summary")
+async def get_character(request: web.Request) -> web.Response:
+    characters = await apply_app_version_filter(
+        request,
+        CharacterEntity.all()
+    )
+
+    character_data = list([
+        {
+            "id": character.app_id,
+            "name": character.name,
+            "alias": character.alias,
+        }
+        for character
+        in characters
+    ])
+
+    return web.json_response(
+        data=character_data
+    )
+
 
 @route_table.get("/weapon")
 async def get_character(request: web.Request) -> web.Response:
@@ -125,7 +148,7 @@ async def get_trait(request: web.Request) -> web.Response:
             .trait_list_to_json(
             apply_app_version_filter(
                 request,
-                Trait.all() # TODO create trait entity
+                TraitEntity.all()
             )
         )
     )
