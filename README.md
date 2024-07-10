@@ -23,6 +23,23 @@ if there are updates it will download them and store them in the postgres db.
 
 The app will periodically poll for the latest api version and will pull any updates it sees.
 
+### Notable Endpoints 
+- `GET /ping` tests the server is up and running
+- `GET /optimized/character` a paginated endpoint that returns an "optimized" view of character data with all attributes that
+  in the BMG api are returned separately, but this endpoint maps them onto the character model. Additionally, there is 
+  some caching involved so this optimization is generated once and then stored in memory.
+- `GET /optimized/character/id/{id}` another endpoint providing optimized character data for a single character by app id.
+  by default the endpoint returns the character data from the latest game data version. Most endpoints, including this 
+  can explicitly set which app data version to use by adding a url parameter `app_version` to the url.
+- `GET /optimized/character/precache` An endpoint that triggers all optimized character views to be prechached for the 
+  current app version.
+- `GET /optimized/cache/clear` clears the optimized data cache.
+- `GET /purge` purges the backend database
+- `GET /character/summary` Returns a list of character names and aliases and their corresponding id.
+- `GET /weapon` returns a list of all weapons and fairly raw metadata
+- `GET /trait` returns a list of all traits and fairly raw metadata 
+
+### App Version History
 Previous versions are retained in the database indefinitely in the current implementation. Future updates will add a 
 process to partially prune old versions (i.e. retain some metadata but drop specifics about the version).
 
