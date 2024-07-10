@@ -62,9 +62,9 @@ async def get_optimized_character(request: web.Request) -> web.Response:
         )
 
     paginated: PaginationResult = await paginate(
-        query=apply_app_version_filter(
+        query=await apply_app_version_filter(
             request=request,
-            query=apply_app_version_filter(
+            query=await apply_app_version_filter(
                 request,
                 CharacterEntity.all().order_by("id")
             )
@@ -76,10 +76,10 @@ async def get_optimized_character(request: web.Request) -> web.Response:
     character_models = []
 
     async for character_entity in paginated.data.prefetch_related("game_data_version"):
-        model_data = await load_character(character_entity.app_id)
+        model_data = await load_character(character_entity.app_id, character_entity.id)
 
         if model_data is None:
-            model_data = cache_character(app_version, character_entity.app_id, character_entity)
+            model_data = await cache_character(app_version, character_entity.app_id, character_entity)
 
         character_models.append(model_data)
 
@@ -114,10 +114,14 @@ async def get_optimized_character_by_id(request: web.Request) -> web.Response:
     model_data = await load_character(app_version, character_id)
 
     if model_data is None:
-        character_entity = await apply_app_version_filter(
-            request,
-            CharacterEntity.filter(app_id=character_id)
-        ).first().prefetch_related("game_data_version")
+        character_entity = await (
+                await apply_app_version_filter(
+                request,
+                CharacterEntity
+                .filter(app_id=character_id)
+                .prefetch_related("game_data_version")
+            )
+        ).first()
         model_data = await cache_character(app_version, character_entity.app_id, character_entity)
 
     data_text = json.dumps(
@@ -136,12 +140,13 @@ async def get_optimized_character_by_id(request: web.Request) -> web.Response:
 async def precache_optimized_characters(request: web.Request) -> web.Response:
     app_version = get_app_version(request)
 
-    character_entities = apply_app_version_filter(
+    character_entities_query = await apply_app_version_filter(
         request,
         CharacterEntity.all()
-    ).prefetch_related("game_data_version")
+        .prefetch_related("game_data_version")
+    )
 
-    async for character_entity in character_entities:
+    async for character_entity in character_entities_query:
         await cache_character(app_version, character_entity.id, character_entity)
 
 

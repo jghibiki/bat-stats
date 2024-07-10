@@ -49,7 +49,7 @@ async def get_affiliation(request: web.Request) -> web.Response:
         await EntitySerializer
             .get_instance()
             .affiliation_list_to_json(
-            apply_app_version_filter(
+            await apply_app_version_filter(
                 request,
                 AffiliationEntity.all()
             )
@@ -68,7 +68,7 @@ async def get_card(request: web.Request) -> web.Response:
         await EntitySerializer
             .get_instance()
             .card_list_to_json(
-            apply_app_version_filter(
+            await apply_app_version_filter(
                 request,
                 Card.all() # todo create card entity
             )
@@ -87,7 +87,7 @@ async def get_character(request: web.Request) -> web.Response:
         await EntitySerializer
             .get_instance()
             .character_list_to_json(
-            apply_app_version_filter(
+            await apply_app_version_filter(
                 request,
                 CharacterEntity.all()
             )
@@ -101,9 +101,11 @@ async def get_character(request: web.Request) -> web.Response:
 
 @route_table.get("/character/summary")
 async def get_character(request: web.Request) -> web.Response:
-    characters = await apply_app_version_filter(
-        request,
-        CharacterEntity.all()
+    characters = await (
+            await apply_app_version_filter(
+            request,
+            CharacterEntity.all()
+        )
     )
 
     character_data = list([
@@ -127,7 +129,7 @@ async def get_character(request: web.Request) -> web.Response:
         await EntitySerializer
             .get_instance()
             .weapon_list_to_json(
-            apply_app_version_filter(
+            await apply_app_version_filter(
                 request,
                 WeaponEntity.all()
             )
@@ -146,7 +148,7 @@ async def get_trait(request: web.Request) -> web.Response:
         await EntitySerializer
             .get_instance()
             .trait_list_to_json(
-            apply_app_version_filter(
+            await apply_app_version_filter(
                 request,
                 TraitEntity.all()
             )

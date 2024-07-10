@@ -14,10 +14,10 @@ from bat_stats_api.data.model.weapon_trait_model import WeaponTraitModel
 
 
 async def to_model(entity: CharacterEntity) -> CharacterModel:
-    character_affiliations = await _generate_character_affiliations(entity.affiliations)
-    rival_affiliations = await _generate_character_rival_affiliations(entity.rival_affiliation_ids)
-    weapons = await _generate_weapons(entity.weapon_ids)
-    character_traits = await _generate_character_traits(entity.traits)
+    character_affiliations = await _generate_character_affiliations(entity.affiliations, entity.game_data_version.id)
+    rival_affiliations = await _generate_character_rival_affiliations(entity.rival_affiliation_ids, entity.game_data_version.id)
+    weapons = await _generate_weapons(entity.weapon_ids, entity.game_data_version.id)
+    character_traits = await _generate_character_traits(entity.traits, entity.game_data_version.id)
 
     return CharacterModel(
         id=entity.id,
@@ -54,11 +54,11 @@ async def to_model(entity: CharacterEntity) -> CharacterModel:
     )
 
 
-async def _generate_character_affiliations(affiliations: List[dict]) -> List[CharacterAffiliationModel]:
+async def _generate_character_affiliations(affiliations: List[dict], version_id: str) -> List[CharacterAffiliationModel]:
     mapped = []
 
     affiliation_metadata = {e["affiliation_id"]: e for e in affiliations}
-    query = AffiliationEntity.filter(app_id__in=affiliation_metadata.keys())
+    query = AffiliationEntity.filter(app_id__in=affiliation_metadata.keys(), game_data_version=version_id)
     async for raw_affiliation in query.prefetch_related():
         metadata = affiliation_metadata[raw_affiliation.app_id]
 
@@ -74,10 +74,10 @@ async def _generate_character_affiliations(affiliations: List[dict]) -> List[Cha
     return mapped
 
 
-async def _generate_character_rival_affiliations(affiliations: List[int]) -> List[CharacterRivalAffiliationModel]:
+async def _generate_character_rival_affiliations(affiliations: List[int], game_data_version: int) -> List[CharacterRivalAffiliationModel]:
     mapped = []
 
-    query = AffiliationEntity.filter(app_id__in=affiliations)
+    query = AffiliationEntity.filter(app_id__in=affiliations, game_data_version=game_data_version)
     async for raw_affiliation in query.prefetch_related():
         new_model = CharacterRivalAffiliationModel(
             id=raw_affiliation.id,
@@ -88,12 +88,12 @@ async def _generate_character_rival_affiliations(affiliations: List[int]) -> Lis
     return mapped
 
 
-async def _generate_weapons(weapon_ids: List[int]) -> List[CharacterAffiliationModel]:
+async def _generate_weapons(weapon_ids: List[int], game_data_version) -> List[CharacterAffiliationModel]:
     mapped = []
 
-    query = WeaponEntity.filter(app_id__in=weapon_ids)
+    query = WeaponEntity.filter(app_id__in=weapon_ids, game_data_version=game_data_version)
     async for raw_weapon in query.prefetch_related("game_data_version"):
-        weapon_traits = await _generate_weapon_traits(raw_weapon.traits)
+        weapon_traits = await _generate_weapon_traits(raw_weapon.traits, game_data_version)
 
         damage = [
             await damage_converter.to_model(damage)
@@ -115,10 +115,10 @@ async def _generate_weapons(weapon_ids: List[int]) -> List[CharacterAffiliationM
     return mapped
 
 
-async def _generate_weapon_traits(trait_metadata: List[dict]) -> List[WeaponTraitModel]:
+async def _generate_weapon_traits(trait_metadata: List[dict], game_data_version) -> List[WeaponTraitModel]:
     mapped = []
     trait_map = { e["trait_id"]: e["alternate_name"] for e in trait_metadata}
-    query = TraitEntity.filter(app_id__in=trait_map.keys())
+    query = TraitEntity.filter(app_id__in=trait_map.keys(), game_data_version=game_data_version)
     async for raw_trait in query.prefetch_related("game_data_version"):
         new_model = WeaponTraitModel(
             alternative_name=trait_map[raw_trait.app_id],
@@ -129,10 +129,10 @@ async def _generate_weapon_traits(trait_metadata: List[dict]) -> List[WeaponTrai
     return mapped
 
 
-async def _generate_character_traits(trait_metadata: List[dict]) -> List[CharacterTraitModel]:
+async def _generate_character_traits(trait_metadata: List[dict], game_data_version) -> List[CharacterTraitModel]:
     mapped = []
     trait_map = { e["trait_id"]: e["alternate_name"] for e in trait_metadata}
-    query = TraitEntity.filter(app_id__in=trait_map.keys())
+    query = TraitEntity.filter(app_id__in=trait_map.keys(), game_data_version=game_data_version)
     async for raw_trait in query.prefetch_related("game_data_version"):
         new_model = CharacterTraitModel(
             alternative_name = trait_map[raw_trait.app_id],
